@@ -51,6 +51,17 @@ ZS.Communication.UserExpenses = function() {
               type: "POST",
               dataType : "JSON"
           });
+      },
+      RegisterDevice : function(token,user){
+        return $.ajax({
+          url : rooturl + "Home/RegisterDevice",
+          type: "POST",
+          dataType : "JSON",
+          data : {
+            UserName : user,
+            deviceToken : token
+          }
+        });
       }
     };
 }();

@@ -8,7 +8,23 @@ ZS.MainApp = new function () {
     this.initialize = function () {
         console.log("binding device ready events");
         document.addEventListener("deviceready", self.onDeviceReady, true);
+        document.addEventListener("online",self.onOnline,true);
+        document.addEventListener("offline",self.onOffline,true);
     };
+
+    self.onOnline = function(){
+        console.log("App is online");
+        ZS.Communication.UserExpenses.IsAlive().done(funtion(){
+            ZS.Common.Online = true;
+        }).fail(function(){
+            ZS.Common.Online = false;
+        });
+    };
+
+    self.onOffline = function(){
+        console.log("application is offline");
+        ZS.Common.Online = false;
+    }
 
     var fetchNewDataFromServer = function () {
         if (deviceInfo.IsConnected) {
@@ -29,9 +45,12 @@ ZS.MainApp = new function () {
 
     self.onDeviceReady = function () {
 
-        //dac.Read(expenses);
         //window.navigator.notification.alert("Device Ready");
         console.log("application is ready");
+        
+        //TODO : Find a better place for this guy. 
+        ZS.PushNotification.init();
+        
         //Load Commons
         ZS.Common.Options = new ZS.Model.Options();
         ZS.Common.Expenses = new ZS.Model.ExpenseCollection();
@@ -43,9 +62,6 @@ ZS.MainApp = new function () {
             ZS.Common.Online = false;
             $('#wifiStatus').removeClass("icon-signal");
         });
-
-        //Fill device details. 
-        deviceInfo = new ZS.Model.DeviceInfo();
 
         $('ul.nav li').on('click', function (event) {
             $('li.active').removeClass('active');
@@ -71,11 +87,14 @@ ZS.MainApp = new function () {
             view.Render().done(function () {
                 $('div#contents').html(this.el);
             });
+            
             fetchNewDataFromServer();
         });
 
 
         $('li#navAuth').on('click', function () {
+            //var oldLocation = window.location;
+            //window.location = "http://splitexpense.apphb.com/Account/Login?ReturnUrl=" + oldLocation;
             var view = new ZS.Views.AuthView();
             view.Render().done(function () {
                 $('div#contents').html(this.elm);
